@@ -29,6 +29,9 @@ west)
 	;;
 *)
 	printf '%s %s\n' "$(basename "$0")" "$*" >>"${FAKE_LOG}"
+	if [ "$(basename "$0")" = JLinkExe ]; then
+		printf '%s\n' 'Target connection not established yet but required for command.'
+	fi
 	if [ "${FAKE_FLASH_ERROR:-0}" = 1 ]; then
 		printf '%s\n' 'Error occurred: Could not connect to the target device.'
 	fi

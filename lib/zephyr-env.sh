@@ -128,7 +128,7 @@ wbuild() {
 	return "${rc}"
 }
 
-_fw_flash_error_regex='Error[[:space:]]+occurred:|Failed[[:space:]]+to[[:space:]]+attach|Target[[:space:]]+connection[[:space:]]+not[[:space:]]+established|Could[[:space:]]+not[[:space:]]+connect|Cannot[[:space:]]+connect|Failed[[:space:]]+to[[:space:]]+(load|program)|Programming[[:space:]]+failed|Verification[[:space:]]+failed|Verify[[:space:]]+failed|ERROR:'
+_fw_flash_error_regex='Error[[:space:]]+occurred:|Failed[[:space:]]+to[[:space:]]+attach|Could[[:space:]]+not[[:space:]]+connect|Cannot[[:space:]]+connect|Failed[[:space:]]+to[[:space:]]+(load|program)|Programming[[:space:]]+failed|Verification[[:space:]]+failed|Verify[[:space:]]+failed|ERROR:'
 
 wflash() {
 	local profile=debug backend="${FW_FLASH_BACKEND:-jlink}" verbose=0 hex_file="" arg
@@ -163,6 +163,7 @@ wflash() {
 	local tmp rc; tmp=$(mktemp)
 	if [ "${backend}" = jlink ]; then
 		if [ "${verbose}" -eq 1 ]; then "${command[@]}" <<EOF 2>&1 | tee "${tmp}"
+connect
 r
 h
 loadfile "${hex_file}"
@@ -171,6 +172,7 @@ g
 exit
 EOF
 			rc=${PIPESTATUS[0]}; else "${command[@]}" <<EOF >"${tmp}" 2>&1
+connect
 r
 h
 loadfile "${hex_file}"
