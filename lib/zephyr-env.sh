@@ -1,5 +1,29 @@
 #!/usr/bin/env bash
 
+_fw_windows_shell() {
+	case "${FW_NATIVE_PATH_MODE:-auto}:${MSYSTEM:-}:${OSTYPE:-}" in
+	1:*|auto:MSYS*:*|auto:MINGW*:*|auto:*:msys*|auto:*:cygwin*)
+		return 0
+		;;
+	esac
+	return 1
+}
+
+_fw_native_path() {
+	case "${1:-}" in
+	/*|./*|../*|[A-Za-z]:/*)
+		if _fw_windows_shell && command -v cygpath >/dev/null 2>&1; then
+			cygpath -w -- "$1"
+		else
+			printf '%s\n' "$1"
+		fi
+		;;
+	*)
+		printf '%s\n' "${1:-}"
+		;;
+	esac
+}
+
 _fw_apply_profile() {
 	local profile="${1:-debug}"
 	case "${profile}" in
@@ -131,10 +155,10 @@ wflash() {
 	local device="${FW_FLASH_DEVICE:-NRF54L15_M33}" interface="${FW_FLASH_INTERFACE:-SWD}" speed="${FW_FLASH_SPEED:-4000}" program_command
 	local -a command=()
 	case "${backend}" in
-	jlink) command=("${FW_JLINK_EXE:-JLinkExe}" -device "${device}" -if "${interface}" -speed "${speed}") ;;
-	pyocd) command=("${FW_PYOCD_EXE:-pyocd}" flash --target "${FW_PYOCD_TARGET:-${device}}" --frequency "${speed}" "${hex_file}") ;;
-	probe-rs) command=("${FW_PROBE_RS_EXE:-probe-rs}" download --chip "${FW_PROBE_RS_CHIP:-${device}}" "${hex_file}") ;;
-	openocd) command=("${FW_OPENOCD_EXE:-openocd}"); [ -n "${FW_OPENOCD_INTERFACE_CFG:-}" ] && command+=(-f "${FW_OPENOCD_INTERFACE_CFG}"); [ -n "${FW_OPENOCD_TARGET_CFG:-}" ] && command+=(-f "${FW_OPENOCD_TARGET_CFG}"); command+=("${FW_OPENOCD_ARGS[@]}"); printf -v program_command 'program "%s" verify reset exit' "${hex_file}"; command+=(-c "${program_command}") ;;
+	jlink) command=("$(_fw_native_path "${FW_JLINK_EXE:-JLinkExe}")" -device "${device}" -if "${interface}" -speed "${speed}") ;;
+	pyocd) command=("$(_fw_native_path "${FW_PYOCD_EXE:-pyocd}")" flash --target "${FW_PYOCD_TARGET:-${device}}" --frequency "${speed}" "$(_fw_native_path "${hex_file}")") ;;
+	probe-rs) command=("$(_fw_native_path "${FW_PROBE_RS_EXE:-probe-rs}")" download --chip "${FW_PROBE_RS_CHIP:-${device}}" "$(_fw_native_path "${hex_file}")") ;;
+	openocd) command=("$(_fw_native_path "${FW_OPENOCD_EXE:-openocd}")"); [ -n "${FW_OPENOCD_INTERFACE_CFG:-}" ] && command+=(-f "$(_fw_native_path "${FW_OPENOCD_INTERFACE_CFG}")"); [ -n "${FW_OPENOCD_TARGET_CFG:-}" ] && command+=(-f "$(_fw_native_path "${FW_OPENOCD_TARGET_CFG}")"); command+=("${FW_OPENOCD_ARGS[@]}"); printf -v program_command 'program "%s" verify reset exit' "$(_fw_native_path "${hex_file}")"; command+=(-c "${program_command}") ;;
 	esac
 	local tmp rc; tmp=$(mktemp)
 	if [ "${backend}" = jlink ]; then

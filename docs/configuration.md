@@ -36,6 +36,42 @@ source "${FW_DEVTOOLS_ROOT}/lib/zephyr-env.sh"
 | `FW_COMMON_CMAKE_ARGS` | 所有 profile 的 CMake 参数数组 |
 | `FW_EXTRA_CONFIG_FILES` | 参与 fingerprint 的额外文件数组 |
 
+## Windows Git Bash
+
+Git Bash 支持运行共享 Bash 脚本。需要预先安装 Windows 版本的 NCS 工具链，并让以下命令可用：
+
+```bash
+west --version
+cmake --version
+ninja --version
+python --version
+```
+
+烧录工具可以使用命令名：
+
+```bash
+export FW_JLINK_EXE="JLink.exe"
+export FW_PYOCD_EXE="pyocd.exe"
+export FW_PROBE_RS_EXE="probe-rs.exe"
+export FW_OPENOCD_EXE="openocd.exe"
+```
+
+也可以指定绝对路径：
+
+```bash
+export FW_JLINK_EXE="C:/Program Files/SEGGER/JLink/JLink.exe"
+```
+
+Git Bash 下使用正斜杠。共享脚本只在调用原生烧录工具时使用 `cygpath -w` 转换路径；构建配置和项目路径保持当前 shell 的路径格式。
+
+可选地强制路径模式：
+
+```bash
+export FW_NATIVE_PATH_MODE=auto    # 默认，按 MSYSTEM/OSTYPE 判断
+export FW_NATIVE_PATH_MODE=1       # 强制转换
+export FW_NATIVE_PATH_MODE=0       # 禁止转换
+```
+
 构建目录：
 
 ```text

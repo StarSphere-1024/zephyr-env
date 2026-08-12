@@ -20,6 +20,35 @@
 - 支持仓库根目录 app 和 app 子目录
 - 支持 `BOARD_ROOT` 和额外 Zephyr modules
 
+## Windows Git Bash
+
+Git Bash 可用于运行这些 Bash 脚本，但必须使用 Windows 版本的 NCS 工具链和烧录工具。WSL 和 PowerShell 不是当前默认支持目标。
+
+检查工具链：
+
+```bash
+west --version
+cmake --version
+ninja --version
+python --version
+```
+
+配置 Windows 原生烧录工具：
+
+```bash
+export FW_JLINK_EXE="JLink.exe"
+export FW_PYOCD_EXE="pyocd.exe"
+export FW_PROBE_RS_EXE="probe-rs.exe"
+export FW_OPENOCD_EXE="openocd.exe"
+```
+
+也可以使用绝对路径；Git Bash 使用正斜杠：
+
+```bash
+export FW_JLINK_EXE="C:/Program Files/SEGGER/JLink/JLink.exe"
+```
+
+
 ## 集成
 
 推荐将仓库作为项目 submodule：

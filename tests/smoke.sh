@@ -42,6 +42,8 @@ for name in west JLinkExe pyocd probe-rs openocd; do
 done
 export NCS_BASE="test-ncs"
 export ZEPHYR_SDK_INSTALL_DIR="test-sdk"
+export MSYSTEM=""
+export OSTYPE="linux-gnu"
 export FAKE_LOG="${TMP_DIR}/commands.log"
 export PATH="${FAKE_BIN}:${PATH}"
 export FW_SOURCE_DIR="${APP_DIR}"
