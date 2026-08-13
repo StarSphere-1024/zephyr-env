@@ -194,3 +194,11 @@ wconfig() {
 	_fw_apply_profile "${profile}" || return; _fw_validate_profile || return
 	printf '%s\n' "SOURCE_DIR: ${FW_SOURCE_DIR}" "BUILD_DIR: ${FW_BUILD_DIR}" "PROFILE: ${FW_PROFILE}" "BOARD: ${FW_BOARD}" "BOARD_ROOT: ${FW_BOARD_ROOT:-<unset>}" "CONF_FILE: ${FW_CONF_FILE}" "EXTRA_CONF: ${FW_EXTRA_CONF_FILE:-<unset>}" "FLASH_BACKEND: ${FW_FLASH_BACKEND:-jlink}" "DEVTOOLS_ROOT: ${FW_DEVTOOLS_ROOT}" "JLINK_EXE: ${FW_JLINK_EXE:-JLinkExe}" "PYOCD_EXE: ${FW_PYOCD_EXE:-pyocd}" "PROBE_RS_EXE: ${FW_PROBE_RS_EXE:-probe-rs}" "OPENOCD_EXE: ${FW_OPENOCD_EXE:-openocd}"
 }
+
+
+# 优先使用系统 Git；NCS Git 缺少 git-submodule 等辅助程序
+if [ -x /usr/bin/git ]; then
+   git() {
+      /usr/bin/git "$@"
+   }
+fi
