@@ -156,7 +156,7 @@ wflash() {
 	local -a command=()
 	case "${backend}" in
 	jlink) command=("$(_fw_native_path "${FW_JLINK_EXE:-JLinkExe}")" -device "${device}" -if "${interface}" -speed "${speed}") ;;
-	pyocd) command=("$(_fw_native_path "${FW_PYOCD_EXE:-pyocd}")" flash --target "${FW_PYOCD_TARGET:-${device}}" --frequency "${speed}" "$(_fw_native_path "${hex_file}")") ;;
+	pyocd) command=("$(_fw_native_path "${FW_PYOCD_EXE:-pyocd}")" flash --target "${FW_PYOCD_TARGET:-${device}}" --frequency "${FW_PYOCD_FREQUENCY:-${speed}}"); [ -n "${FW_PYOCD_UID:-}" ] && command+=(-u "${FW_PYOCD_UID}"); command+=("$(_fw_native_path "${hex_file}")") ;;
 	probe-rs) command=("$(_fw_native_path "${FW_PROBE_RS_EXE:-probe-rs}")" download --chip "${FW_PROBE_RS_CHIP:-${device}}" "$(_fw_native_path "${hex_file}")") ;;
 	openocd) command=("$(_fw_native_path "${FW_OPENOCD_EXE:-openocd}")"); [ -n "${FW_OPENOCD_INTERFACE_CFG:-}" ] && command+=(-f "$(_fw_native_path "${FW_OPENOCD_INTERFACE_CFG}")"); [ -n "${FW_OPENOCD_TARGET_CFG:-}" ] && command+=(-f "$(_fw_native_path "${FW_OPENOCD_TARGET_CFG}")"); command+=("${FW_OPENOCD_ARGS[@]}"); printf -v program_command 'program "%s" verify reset exit' "$(_fw_native_path "${hex_file}")"; command+=(-c "${program_command}") ;;
 	esac
@@ -192,7 +192,7 @@ wconfig() {
 	local profile=debug arg
 	for arg in "$@"; do case "${arg}" in -r|--release) profile=release ;; '') ;; *) echo "Usage: wconfig [-r|--release]" >&2; return 2 ;; esac; done
 	_fw_apply_profile "${profile}" || return; _fw_validate_profile || return
-	printf '%s\n' "SOURCE_DIR: ${FW_SOURCE_DIR}" "BUILD_DIR: ${FW_BUILD_DIR}" "PROFILE: ${FW_PROFILE}" "BOARD: ${FW_BOARD}" "BOARD_ROOT: ${FW_BOARD_ROOT:-<unset>}" "CONF_FILE: ${FW_CONF_FILE}" "EXTRA_CONF: ${FW_EXTRA_CONF_FILE:-<unset>}" "FLASH_BACKEND: ${FW_FLASH_BACKEND:-jlink}" "DEVTOOLS_ROOT: ${FW_DEVTOOLS_ROOT}" "JLINK_EXE: ${FW_JLINK_EXE:-JLinkExe}" "PYOCD_EXE: ${FW_PYOCD_EXE:-pyocd}" "PROBE_RS_EXE: ${FW_PROBE_RS_EXE:-probe-rs}" "OPENOCD_EXE: ${FW_OPENOCD_EXE:-openocd}"
+	printf '%s\n' "SOURCE_DIR: ${FW_SOURCE_DIR}" "BUILD_DIR: ${FW_BUILD_DIR}" "PROFILE: ${FW_PROFILE}" "BOARD: ${FW_BOARD}" "BOARD_ROOT: ${FW_BOARD_ROOT:-<unset>}" "CONF_FILE: ${FW_CONF_FILE}" "EXTRA_CONF: ${FW_EXTRA_CONF_FILE:-<unset>}" "FLASH_BACKEND: ${FW_FLASH_BACKEND:-pyocd}" "DEVTOOLS_ROOT: ${FW_DEVTOOLS_ROOT}" "JLINK_EXE: ${FW_JLINK_EXE:-JLinkExe}" "PYOCD_EXE: ${FW_PYOCD_EXE:-pyocd}" "PROBE_RS_EXE: ${FW_PROBE_RS_EXE:-probe-rs}" "OPENOCD_EXE: ${FW_OPENOCD_EXE:-openocd}"
 }
 
 
