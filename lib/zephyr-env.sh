@@ -147,11 +147,30 @@ wflash() {
 	_fw_apply_profile "${profile}" || return
 	if [ -z "${hex_file}" ]; then
 		local candidate
-		for candidate in "${FW_BUILD_DIR}/merged.hex" "${FW_BUILD_DIR}/${FW_APP_NAME:-}/zephyr/zephyr.hex" "${FW_BUILD_DIR}/zephyr/zephyr.hex"; do
-			if [ -f "${candidate}" ]; then hex_file="${candidate}"; break; fi
+		for candidate in \
+			"${FW_BUILD_DIR}/merged.hex" \
+			"${FW_BUILD_DIR}"/merged_*.hex \
+			"${FW_BUILD_DIR}"/../merged_*.hex \
+			"${FW_BUILD_ROOT:-${FW_BUILD_DIR}}"/merged_*.hex; do
+			if [ -f "${candidate}" ]; then
+				hex_file="${candidate}"
+				break
+			fi
 		done
+		if [ -z "${hex_file}" ] && [ "${FW_ALLOW_APP_ONLY_FLASH:-0}" = 1 ]; then
+			for candidate in "${FW_BUILD_DIR}/${FW_APP_NAME:-}/zephyr/zephyr.hex" \
+				"${FW_BUILD_DIR}/zephyr/zephyr.hex"; do
+				if [ -f "${candidate}" ]; then
+					hex_file="${candidate}"
+					break
+				fi
+			done
+		fi
 	fi
-	[ -n "${hex_file}" ] && [ -f "${hex_file}" ] || { echo "Hex file not found: ${hex_file:-${FW_BUILD_DIR}}" >&2; return 1; }
+	[ -n "${hex_file}" ] && [ -f "${hex_file}" ] || {
+		echo "Merged HEX not found; run wbuild --pristine first." >&2
+		return 1
+	}
 	local device="${FW_FLASH_DEVICE:-NRF54L15_M33}" interface="${FW_FLASH_INTERFACE:-SWD}" speed="${FW_FLASH_SPEED:-4000}" program_command
 	local -a command=()
 	case "${backend}" in
