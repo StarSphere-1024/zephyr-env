@@ -19,6 +19,7 @@
 - 烧录工具与 NCS toolchain 版本隔离
 - 支持仓库根目录 app 和 app 子目录
 - 支持 `BOARD_ROOT` 和额外 Zephyr modules
+- 型号 profile（项目提供 `fw_project_model` hook）
 
 ## Windows Git Bash
 
@@ -118,6 +119,8 @@ wbuild -v
 wbuild -r -p
 ```
 
+
+型号支持需由项目 `envsetup.sh` 定义 `fw_project_model`；可用 `wbuild -m a`、`wconfig -m a`、`wflash -m a` 显式选择，项目也可用 `FW_DEFAULT_MODEL` 指定默认值。详见[配置说明](docs/configuration.md)。
 构建目录：
 
 ```text

@@ -33,8 +33,34 @@ source "${FW_DEVTOOLS_ROOT}/lib/zephyr-env.sh"
 | `FW_APP_NAME` | 查找 `${build}/${FW_APP_NAME}/zephyr/zephyr.hex` |
 | `FW_BOARD` | board 名称 |
 | `FW_BOARD_ROOT` | `BOARD_ROOT` CMake 参数 |
+| `FW_DEFAULT_MODEL` | 默认型号；型号目录、配置及烧录选择 |
+| `FW_MODEL_CONF_FILES` | `fw_project_model` 设置的型号 Kconfig 文件数组 |
+| `FW_MODEL_OVERLAY_FILES` | `fw_project_model` 设置的型号 overlay 文件数组 |
 | `FW_COMMON_CMAKE_ARGS` | 所有 profile 的 CMake 参数数组 |
 | `FW_EXTRA_CONFIG_FILES` | 参与 fingerprint 的额外文件数组 |
+
+## 型号
+
+项目可选设置默认型号，并实现型号 hook。每次调用都会先清空型号文件数组，再由 hook 填充；不支持型号的项目无需 hook，传入 `-m` 会被拒绝。
+
+```bash
+export FW_DEFAULT_MODEL=a
+
+fw_project_model() {
+    case "$1" in
+    a) ;;
+    b)
+        FW_MODEL_CONF_FILES=("${FW_SOURCE_DIR}/prj_b.conf")
+        FW_MODEL_OVERLAY_FILES=("${FW_SOURCE_DIR}/app_b.overlay")
+        ;;
+    *) echo "Unknown model: $1" >&2; return 2 ;;
+    esac
+}
+```
+
+`wbuild -m b`、`wconfig -m b`、`wflash -m b` 显式选择型号；无 `-m` 时使用 `FW_DEFAULT_MODEL`（未设置则维持旧的无型号行为）。release 配置排在型号配置之前；多个文件作为 CMake 分号列表传入，并逐个校验及 fingerprint。型号构建目录为 `${FW_BUILD_ROOT}_b`，release 为 `${FW_BUILD_ROOT}_b_release`。型号选择与 `FW_DEBUG_BUILD_DIR`、`FW_RELEASE_BUILD_DIR` 覆盖值冲突时拒绝执行。型号烧录只从所选型号目录找 HEX；不会回退到父目录或其他型号。`-p` 可显式指定 HEX 文件。
+
+`wbuild -m b -- <args...>` 会将 `--` 后参数原样传给 west/CMake。
 
 ## Windows Git Bash
 
